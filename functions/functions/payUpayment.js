@@ -1,15 +1,14 @@
+require("dotenv").config();
 const functions = require("firebase-functions");
 const cors = require("cors")({ origin: true });
 const axios = require("axios");
 const { accessToken } = require("./accessToken/accessToken");
 
-const MERCHANT_POS_ID = "4283004";
-const CLIENT_SECRET = "7f60f24a1573881fe8ea9e19698265d4";
-const CLIENT_ID = "4283004";
-
+const MERCHANT_POS_ID = process.env.MERCHANT_POS_ID;
+const CLIENT_SECRET = process.env.CLIENT_SECRET;
+const CLIENT_ID = process.env.CLIENT_ID;
 
 exports.PayUPayment = functions.https.onRequest((req, res) => {
-  
   cors(req, res, async () => {
     const orderData = req.body.data;
 
@@ -27,8 +26,10 @@ exports.PayUPayment = functions.https.onRequest((req, res) => {
           totalAmount: orderData.totalAmount,
           buyer: {
             email: orderData.buyer.email,
-            firstName: orderData.companyName ? orderData.companyName : orderData.buyer.firstName,
-            lastName:orderData.NIP ? orderData.NIP : orderData.buyer.lastName,
+            firstName: orderData.companyName
+              ? orderData.companyName
+              : orderData.buyer.firstName,
+            lastName: orderData.NIP ? orderData.NIP : orderData.buyer.lastName,
             delivery: orderData.buyer.delivery,
           },
           products: orderData.products,
@@ -41,7 +42,9 @@ exports.PayUPayment = functions.https.onRequest((req, res) => {
         }
       )
       .then((responseFromPayU) => {
-        res.status(200).send({ data: responseFromPayU.request.res.responseUrl });
+        res
+          .status(200)
+          .send({ data: responseFromPayU.request.res.responseUrl });
       })
       .catch((errorFromPayU) => {
         console.error(errorFromPayU);
